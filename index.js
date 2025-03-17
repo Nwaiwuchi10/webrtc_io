@@ -1,12 +1,17 @@
+const http = require("http");
+const cors = require("cors");
 const { Server } = require("socket.io");
+const express = require("express");
 
-const io = new Server(8000, {
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
   cors: true,
 });
 
 const emailToSocketIdMap = new Map();
 const socketidToEmailMap = new Map();
-
+app.use(cors());
 io.on("connection", (socket) => {
   console.log(`Socket Connected`, socket.id);
   socket.on("room:join", (data) => {
@@ -35,4 +40,8 @@ io.on("connection", (socket) => {
     console.log("peer:nego:done", ans);
     io.to(to).emit("peer:nego:final", { from: socket.id, ans });
   });
+});
+const port = 8000;
+server.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
 });
